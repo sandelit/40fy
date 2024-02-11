@@ -2,15 +2,21 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+#[tauri::command]
+fn greet(name: &str) -> String {
+    format!("Hello, {}! You've been greeted from Rust!", name)
+}
 
 #[tauri::command]
-fn clicktest() -> String {
-    String::from("hello from tauri")
+fn copy_to_clipboard(text: &str) -> () {
+    println!("Test");
+
 }
 
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![clicktest])
+        .plugin(tauri_plugin_shell::init())
+        .invoke_handler(tauri::generate_handler![greet, copy_to_clipboard])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
