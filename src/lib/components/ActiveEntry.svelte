@@ -1,12 +1,23 @@
-
 <script lang="ts">
-    import { invoke } from "@tauri-apps/api/core";
+  import { invoke } from "@tauri-apps/api/core";
 
-  const copyToClipboard = () => {
-    invoke("copy_to_clipboard", { text: 'test'})
+  const copyToClipboard = async () => {
+    invoke("copy_to_clipboard", { text: "test" });
+    try {
+      invoke("create_user", { name: "test", age: 32 });
+      console.log("user created");
+    } catch (error) {
+      console.log("user error creation");
+    }
 
-  }
-  
+    try {
+      const users = await invoke("read_users");
+      console.log("Users:", users);
+      // Here you would typically update the DOM with the fetched user data
+    } catch (e) {
+      console.error("Error fetching users:", e);
+    }
+  };
 </script>
 
 <div class="flex-1 flex items-center justify-center">
@@ -27,7 +38,10 @@
       <div>Testman</div>
       <div>icon</div>
     </div>
-    <div class="p-4 cursor-pointer flex justify-between" on:click={copyToClipboard}>
+    <div
+      class="p-4 cursor-pointer flex justify-between"
+      on:click={copyToClipboard}
+    >
       <div>Password:</div>
       <div>*********</div>
       <div>icon</div>

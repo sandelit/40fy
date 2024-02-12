@@ -5,7 +5,7 @@
   import TopBar from "./lib/components/TopBar.svelte";
 </script>
 
-<main class="container">
+<main class="h-screen">
   <TopBar />
   <div class="flex">
     <SideBar />
