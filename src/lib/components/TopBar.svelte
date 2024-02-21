@@ -25,15 +25,17 @@
 <div class="flex justify-between pr-4 pt-4">
   <div />
   {#if searchBar}
-    <div>
+    <div class="flex pb-2 gap-2">
       <input
         type="text"
         name="search"
         id="search"
         placeholder="search"
-        class="border border-black"
+        class="input"
       />
-      <button on:click={addEntry}>+</button>
+      <button class="btn variant-soft" on:click={addEntry}
+        >+</button
+      >
     </div>
   {/if}
   <LightSwitch rounded={"rounded-lg"} width={"w-16"} height={"h-8"} />

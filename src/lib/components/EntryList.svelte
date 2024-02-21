@@ -9,7 +9,6 @@
 
   entries = [entries[0]];
   entries = [...entries, ...entries];
-  entries = [...entries, ...entries];
   entries.push({
     id: "12",
     title: "test",
@@ -63,23 +62,23 @@
   }, {} as GroupedEntries);
 </script>
 
-<div class="flex flex-1 flex-col bg-shark-950 h-1/4">
+<div class="flex flex-1 flex-col h-1/4 bg-surface-800">
   <div>filterbar</div>
 
-  <ul class="bg-primary-300">
+  <ul class="">
     {#each Object.entries(groups) as [letter, entries]}
-      <li class="bg-primary-400 text-2xl">
+      <li class="text-xl p-1">
         <strong>{letter.toUpperCase()}</strong>
       </li>
       {#each entries as entry}
-        <li>
-          <div class="flex bg-primary-700">
+        <li class="bg-surface-900 border border-x-2 border-surface-800">
+          <div class="flex items-center m-2">
             <Avatar
-              initials={letter}
-              rounded="rounded-3xl"
-              background="bg-primary-800"
+              width="w-12"
+              rounded="rounded-2xl"
+              background="bg-surface-600"
             />
-            <p class="text-xl">{entry}</p>
+            <p class="text-xl mx-4">{entry}</p>
           </div>
         </li>
       {/each}

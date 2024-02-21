@@ -19,9 +19,9 @@
 
 {#await readPassword($databaseStore.database) then entries}
   <TopBar />
-  <div class="flex">
+  <div class="flex gap-16">
     <SideBar />
-    <EntryList {entries}} />
+    <EntryList {entries} />
     <ActiveEntry />
   </div>
 {/await}
