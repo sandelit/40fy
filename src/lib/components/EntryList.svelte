@@ -62,7 +62,7 @@
   }, {} as GroupedEntries);
 </script>
 
-<div class="flex flex-1 flex-col h-1/4 bg-surface-800">
+<div class="flex w-1/3 flex-col h-1/4 bg-surface-800 drop-shadow-xl">
   <div>filterbar</div>
 
   <ul class="">

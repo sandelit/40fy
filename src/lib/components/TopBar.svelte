@@ -22,7 +22,9 @@
   /////////////////////////////
 </script>
 
-<div class="flex justify-between pr-4 pt-4">
+<div
+  class="bg-surface-900 border-b border-opacity-30 border-surface-400 flex justify-between pr-4 py-4"
+>
   <div />
   {#if searchBar}
     <div class="flex pb-2 gap-2">
@@ -33,9 +35,7 @@
         placeholder="search"
         class="input"
       />
-      <button class="btn variant-soft" on:click={addEntry}
-        >+</button
-      >
+      <button class="btn variant-soft" on:click={addEntry}>+</button>
     </div>
   {/if}
   <LightSwitch rounded={"rounded-lg"} width={"w-16"} height={"h-8"} />

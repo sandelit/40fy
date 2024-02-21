@@ -1,23 +1,16 @@
-<script lang="ts">
-  import {
-    TreeView,
-    TreeViewItem,
-    RecursiveTreeView,
-    type TreeViewNode,
-  } from "@skeletonlabs/skeleton";
-</script>
-
-<div class="flex-1 pl-6 bg-red">
+<div
+  class="w-64 pl-6 bg-surface-900 h-screen border-r border-opacity-30 border-surface-400 leading-8 pt-8"
+>
   <ul class="pl-6">
     <li>All items</li>
     <li>Favourites</li>
   </ul>
-  <p>Categories</p>
+  <p><strong>Categories</strong></p>
   <ul class="pl-6">
     <li>All items</li>
     <li>Favourites</li>
   </ul>
-  <p>Tags</p>
+  <p><strong>Tags</strong></p>
 
   <ul class="pl-6">
     <li>custom tags</li>

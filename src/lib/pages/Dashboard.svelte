@@ -19,7 +19,7 @@
 
 {#await readPassword($databaseStore.database) then entries}
   <TopBar />
-  <div class="flex gap-16">
+  <div class="flex justify-between gap-16">
     <SideBar />
     <EntryList {entries} />
     <ActiveEntry />
