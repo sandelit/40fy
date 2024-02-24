@@ -27,13 +27,13 @@
 >
   <div />
   {#if searchBar}
-    <div class="flex pb-2 gap-2">
+    <div class="flex gap-2">
       <input
         type="text"
         name="search"
         id="search"
         placeholder="search"
-        class="input"
+        class="input p-2"
       />
       <button class="btn variant-soft" on:click={addEntry}>+</button>
     </div>
