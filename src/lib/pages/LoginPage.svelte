@@ -29,7 +29,7 @@
     on:submit|preventDefault={handleSubmit}
   >
     <label for="password">Master password</label>
-    <input type="password" name="password" bind:value={password} />
+    <input class="input" type="password" name="password" bind:value={password} />
     <div class="mt-4 flex justify-end gap-4">
       <button type="submit">Ok</button>
       <button>Cancel</button>

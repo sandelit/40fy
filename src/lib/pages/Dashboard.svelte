@@ -5,14 +5,18 @@
   import SideBar from "../components/SideBar.svelte";
   import TopBar from "../components/TopBar.svelte";
   import { databaseStore } from "../stores";
+  import type { Entry } from "../models/Entry";
 
-  const readPassword = async (database: string) => {
+  let selectedEntry: Entry | null = null;
+
+  const readPassword = async (database: string): Promise<Entry[]> => {
     try {
-      const entries = await invoke("read_passwords", { database });
+      const entries: Entry[] = await invoke("read_passwords", { database });
       console.log("entries:", entries);
       return entries;
     } catch (e) {
       console.error("Error fetching entries:", e);
+      return [];
     }
   };
 </script>
@@ -21,7 +25,7 @@
   <TopBar />
   <div class="flex justify-between gap-16">
     <SideBar />
-    <EntryList {entries} />
-    <ActiveEntry />
+    <EntryList {entries} bind:selectedEntry />
+    <ActiveEntry entry={selectedEntry} />
   </div>
 {/await}
