@@ -20,42 +20,43 @@
   <div
     class="h-1/2 rounded-2xl bg-surface-900 mt-16 mr-32 border border-opacity-80 border-surface-800 drop-shadow-xl p-12"
   >
-    {#if entry}
-      <!-- content here -->
-      <div><h1 class="text-center mb-12 text-2xl">{entry.title}</h1></div>
+    <div>
+      <h1 class="text-center mb-12 text-2xl">
+        {entry?.title || "_"}
+      </h1>
+    </div>
 
-      <div>
-        <button
-          class="w-full border-b border-opacity-30 border-surface-400 p-4"
-          on:click={copyToClipboard}
-        >
-          <div class="flex justify-between hover:scale-105">
-            <pre>Email:     {entry.email}</pre>
-            <CopyIcon />
-          </div>
-        </button>
-      </div>
+    <div>
+      <button
+        class="w-full border-b border-opacity-30 border-surface-400 p-4"
+        on:click={copyToClipboard}
+      >
+        <div class="flex justify-between hover:scale-105">
+          <pre>Email:     {entry?.email || ""}</pre>
+          <CopyIcon />
+        </div>
+      </button>
+    </div>
 
-      <div>
-        <button
-          class="w-full border-b border-opacity-30 border-surface-400 p-4"
-          on:click={copyToClipboard}
-        >
-          <div class="flex justify-between hover:scale-105">
-            <pre>Username:  {entry.username}</pre>
-            <CopyIcon />
-          </div>
-        </button>
-      </div>
+    <div>
+      <button
+        class="w-full border-b border-opacity-30 border-surface-400 p-4"
+        on:click={copyToClipboard}
+      >
+        <div class="flex justify-between hover:scale-105">
+          <pre>Username:  {entry?.username || ""}</pre>
+          <CopyIcon />
+        </div>
+      </button>
+    </div>
 
-      <div>
-        <button class="w-full p-4" on:click={copyToClipboard}>
-          <div class="flex justify-between hover:scale-105">
-            <pre>Password:  ********</pre>
-            <CopyIcon />
-          </div>
-        </button>
-      </div>
-    {/if}
+    <div>
+      <button class="w-full p-4" on:click={copyToClipboard}>
+        <div class="flex justify-between hover:scale-105">
+          <pre>Password:  {entry ? "********" : ""}</pre>
+          <CopyIcon />
+        </div>
+      </button>
+    </div>
   </div>
 </div>

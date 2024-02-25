@@ -9,7 +9,6 @@
     [key: string]: Entry[];
   };
 
-  entries = []
   entries.push({
     id: "12",
     title: "test",
@@ -43,7 +42,7 @@
   };
 </script>
 
-<div class="flex w-1/3 flex-col h-1/4 bg-surface-800 drop-shadow-xl">
+<div class="flex w-1/3 flex-col h-screen bg-surface-800 drop-shadow-xl">
   <div>filterbar</div>
 
   <ul>
