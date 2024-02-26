@@ -2,6 +2,9 @@
   import { LightSwitch } from "@skeletonlabs/skeleton";
   import { invoke } from "@tauri-apps/api/core";
   import { databaseStore } from "../stores";
+  import { createEventDispatcher } from "svelte";
+
+  const dispatch = createEventDispatcher();
 
   export let searchBar = true;
 
@@ -10,14 +13,15 @@
     let database = $databaseStore.database;
 
     invoke("add_password", {
-      id: "1",
-      title: "testtitle",
+      id: "1234111",
+      title: "ftsrtrst",
       url: "www.com",
       username: "userrrrr",
       email: "user@user.com",
       password: "123en",
       database,
     });
+    dispatch("entryAdded");
   };
   /////////////////////////////
 </script>

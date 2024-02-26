@@ -9,23 +9,22 @@
 
   let selectedEntry: Entry | null = null;
 
-  const readPassword = async (database: string): Promise<Entry[]> => {
-    try {
-      const entries: Entry[] = await invoke("read_passwords", { database });
-      console.log("entries:", entries);
-      return entries;
-    } catch (e) {
-      console.error("Error fetching entries:", e);
-      return [];
-    }
+  const readPassword = async (): Promise<Entry[]> => {
+    return invoke("read_passwords", { database: $databaseStore.database });
   };
+
+  let entriesPromise = readPassword();
 </script>
 
-{#await readPassword($databaseStore.database) then entries}
-  <TopBar />
-  <div class="flex justify-between gap-16">
-    <SideBar />
+<TopBar
+  on:entryAdded={() => {
+    entriesPromise = readPassword();
+  }}
+/>
+<div class="flex justify-between">
+  <SideBar />
+  {#await entriesPromise then entries}
     <EntryList {entries} bind:selectedEntry />
-    <ActiveEntry entry={selectedEntry} />
-  </div>
-{/await}
+  {/await}
+  <ActiveEntry entry={selectedEntry} />
+</div>
