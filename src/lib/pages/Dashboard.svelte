@@ -21,7 +21,7 @@
     entriesPromise = readPassword();
   }}
 />
-<div class="flex justify-between">
+<div class="flex">
   <SideBar />
   {#await entriesPromise then entries}
     <EntryList {entries} bind:selectedEntry />

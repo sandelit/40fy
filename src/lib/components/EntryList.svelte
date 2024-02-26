@@ -42,10 +42,12 @@
   };
 </script>
 
-<div class="flex w-1/3 flex-col h-screen bg-surface-800 drop-shadow-xl">
+<div
+  class="w-64 flex flex-col h-screen bg-surface-800 drop-shadow-xl overflow-y-scroll "
+>
   <div>filterbar</div>
 
-  <ul>
+  <ul class="flex-1">
     {#each Object.entries(groups) as [letter, entries]}
       <li class="text-xl p-1 pl-4">
         <strong>{letter.toUpperCase()}</strong>

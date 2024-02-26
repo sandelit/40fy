@@ -16,7 +16,7 @@
   };
 </script>
 
-<main class="h-screen">
+<main class="h-screen overflow-y-hidden">
   <Router {routes} />
 </main>
 <!-- 

@@ -16,9 +16,9 @@
   };
 </script>
 
-<div class="h-screen w-1/3">
+<div class="flex-1 flex mt-16 justify-center">
   <div
-    class="h-1/2 rounded-2xl bg-surface-900 mt-16 mr-32 border border-opacity-80 border-surface-800 drop-shadow-xl p-12"
+    class="h-fit rounded-2xl bg-surface-900 border border-opacity-80 border-surface-800 drop-shadow-xl p-12"
   >
     <div>
       <h1 class="text-center mb-12 text-2xl">
@@ -57,6 +57,13 @@
           <CopyIcon />
         </div>
       </button>
+    </div>
+
+    <div class="opacity-50 grid grid-cols-2 gap-x-4 w-3/4 mt-12">
+      <p class="text-right">Last modified:</p>
+      <p>2029.1</p>
+      <p class="text-right">Created:</p>
+      <p>2022.1</p>
     </div>
   </div>
 </div>
