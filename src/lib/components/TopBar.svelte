@@ -1,7 +1,7 @@
 <script>
   import { LightSwitch } from "@skeletonlabs/skeleton";
   import { invoke } from "@tauri-apps/api/core";
-  import { databaseStore } from "../stores";
+  import { vaultStore } from "../stores";
   import { createEventDispatcher } from "svelte";
 
   const dispatch = createEventDispatcher();
@@ -10,7 +10,7 @@
 
   /////////////////////////////
   const addEntry = () => {
-    let database = $databaseStore.database;
+    let vault = $vaultStore.vault;
 
     invoke("add_password", {
       id: "12341112",
@@ -19,7 +19,7 @@
       username: "userrrrr",
       email: "user@user.com",
       password: "123en",
-      database,
+      vault,
     });
     dispatch("entryAdded");
   };

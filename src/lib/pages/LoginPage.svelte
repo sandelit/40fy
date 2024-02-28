@@ -3,21 +3,24 @@
   import { appDataDir } from "@tauri-apps/api/path";
   import { appLocalDataDir } from "@tauri-apps/api/path";
   import TopBar from "../components/TopBar.svelte";
-  import { databaseStore } from "../stores";
+  import { vaultStore } from "../stores";
   import { push } from "svelte-spa-router";
 
   // TODO: implement windows acc & key file authentication
   let password: String;
 
   const handleSubmit = async () => {
-    if ($databaseStore && password) {
+    if ($vaultStore && password) {
+      /*
+
       const result = await invoke("authorize", {
-        database: $databaseStore.database,
+        vault: $vaultStore.vault,
         password,
       });
       console.log(result);
+      */
 
-      push('/dashboard')
+      push("/dashboard");
     }
   };
 </script>
@@ -29,7 +32,12 @@
     on:submit|preventDefault={handleSubmit}
   >
     <label for="password">Master password</label>
-    <input class="input" type="password" name="password" bind:value={password} />
+    <input
+      class="input"
+      type="password"
+      name="password"
+      bind:value={password}
+    />
     <div class="mt-4 flex justify-end gap-4">
       <button type="submit">Ok</button>
       <button>Cancel</button>

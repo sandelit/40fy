@@ -4,13 +4,13 @@
   import EntryList from "../components/EntryList.svelte";
   import SideBar from "../components/SideBar.svelte";
   import TopBar from "../components/TopBar.svelte";
-  import { databaseStore } from "../stores";
+  import { vaultStore } from "../stores";
   import type { Entry } from "../models/Entry";
 
   let selectedEntry: Entry | null = null;
 
   const readPassword = async (): Promise<Entry[]> => {
-    return invoke("read_passwords", { database: $databaseStore.database });
+    return invoke("read_passwords", { vault: $vaultStore.vault });
   };
 
   let entriesPromise = readPassword();

@@ -2,17 +2,17 @@
   import { invoke } from "@tauri-apps/api/core";
   import CopyIcon from "./icons/CopyIcon.svelte";
   import type { Entry } from "../models/Entry";
+  import { clipboard } from "@skeletonlabs/skeleton";
 
   export let entry: Entry | null = null;
 
-  const copyToClipboard = async (event) => {
+  const styleClick = (event: any) => {
     event.target.parentElement.classList.add("scale-1");
     event.target.parentElement.classList.remove("hover:scale-105");
     setTimeout(() => {
       event.target.parentElement.classList.add("hover:scale-105");
       event.target.parentElement.classList.remove("scale-1");
     }, 100);
-    invoke("copy_to_clipboard", { text: "test" });
   };
 </script>
 
@@ -29,7 +29,8 @@
     <div>
       <button
         class="w-full border-b border-opacity-30 border-surface-400 p-4"
-        on:click={copyToClipboard}
+        use:clipboard={entry?.email || ""}
+        on:click={styleClick}
       >
         <div class="flex justify-between hover:scale-105">
           <pre>Email:     {entry?.email || ""}</pre>
@@ -41,7 +42,8 @@
     <div>
       <button
         class="w-full border-b border-opacity-30 border-surface-400 p-4"
-        on:click={copyToClipboard}
+        use:clipboard={entry?.username || ""}
+        on:click={styleClick}
       >
         <div class="flex justify-between hover:scale-105">
           <pre>Username:  {entry?.username || ""}</pre>
@@ -51,7 +53,11 @@
     </div>
 
     <div>
-      <button class="w-full p-4" on:click={copyToClipboard}>
+      <button
+        class="w-full p-4"
+        use:clipboard={entry?.password || ""}
+        on:click={styleClick}
+      >
         <div class="flex justify-between hover:scale-105">
           <pre>Password:  {entry ? "********" : ""}</pre>
           <CopyIcon />

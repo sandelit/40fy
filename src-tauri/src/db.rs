@@ -1,4 +1,6 @@
-use rusqlite::{params, Connection, DatabaseName};
+use std::path::Path;
+
+use rusqlite::{params, Connection};
 
 #[derive(Debug, serde::Serialize)]
 pub struct Password {
@@ -12,23 +14,6 @@ pub struct Password {
 
 impl Password {
     pub fn new(
-        title: String,
-        url: String,
-        username: String,
-        email: String,
-        password: String,
-    ) -> Password {
-        Password {
-            id: 0,
-            title,
-            url,
-            username,
-            email,
-            password,
-        }
-    }
-
-    pub fn new_with_id(
         id: usize,
         title: String,
         url: String,
@@ -47,14 +32,51 @@ impl Password {
     }
 }
 
+#[derive(Debug)]
 pub struct Database {
     conn: Connection,
 }
 
 impl Database {
-    pub fn new(key: String, database_path: String) -> Result<Database, rusqlite::Error> {
-        let conn = Connection::open(database_path)?;
-        //let conn = Connection::open("my_database.db").map_err(|e| e.to_string())?;
+    pub fn connect() -> Result<Connection, rusqlite::Error> {
+        return Ok(Connection::open("./passwords.db")?)
+    }
+
+    pub fn init() -> Result<Database, rusqlite::Error> {
+        let conn = Connection::open("./passwords.db")?;
+        let db = Database { conn };
+
+        db.create_tables();
+
+        Ok(db)
+    }
+
+    fn create_tables(&self) -> Result<(), rusqlite::Error> {
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS MasterPassword(
+                id INTEGER PRIMARY KEY,
+                password TEXT NOT NULL
+            )",
+        [])?;
+        self.conn.execute(
+            "CREATE TABLE IF NOT EXISTS Password(
+                id INTEGER PRIMARY KEY,
+                title TEXT NOT NULL,
+                url TEXT,
+                username TEXT,
+                email TEXT,
+                password TEXT 
+            )",
+        [])?;
+
+        Ok(())
+    }
+}
+
+/*
+impl Database {
+    pub fn new(key: String) -> Result<Database, rusqlite::Error> {
+        let conn = Connection::open("passwords.db")?;
         // set password to our database. without this passphrase database is not readable
         //conn.pragma_update(Some(DatabaseName::Main), "KEY", key)?;
         let db = Database { conn };
@@ -121,3 +143,4 @@ impl Database {
             .unwrap();
     }
 }
+ */
