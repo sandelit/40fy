@@ -80,11 +80,11 @@ fn list_vaults() -> Result<Vec<String>, String> {
         .map_err(|e| e.to_string())?;
 
     // Prepare the SQL query to select all user-created table names
-    let mut stmt = conn.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'MasterPassword'")
+    let mut statement = conn.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'MasterPassword'")
         .map_err(|e| e.to_string())?;
 
     // Execute the query and collect table names into a Vec<String>
-    let tables = stmt.query_map([], |row| {
+    let tables = statement.query_map([], |row| {
         Ok(row.get::<_, String>(0)?)
     })
     .map_err(|e| e.to_string())?
@@ -98,10 +98,30 @@ fn list_vaults() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
-fn add_vault(name: &str, password: &str) -> () {
-    println!("{}, {}", name, password);
+fn add_vault(name: &str, password: &str) -> Result<(), String> {
+    // Basic validation for table name to prevent SQL injections.
+    // Adjust the regex to match your application's requirements for table names.
 
-    
+    println!("{}, {}", name, password);
+    let conn = rusqlite::Connection::open("./passwords.db")
+        .map_err(|e| e.to_string())?;
+
+    // Fixed SQL syntax
+    let statement = format!("CREATE TABLE IF NOT EXISTS {} (
+        id INTEGER PRIMARY KEY,
+        master_password INTEGER,
+        title TEXT NOT NULL,
+        url TEXT,
+        username TEXT,
+        email TEXT,
+        password TEXT,
+        FOREIGN KEY(master_password) REFERENCES MasterPassword(id)
+    )", name);
+
+    conn.execute(&statement, rusqlite::params![])
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[tauri::command]

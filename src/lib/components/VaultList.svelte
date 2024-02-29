@@ -3,17 +3,13 @@
   import { onMount } from "svelte";
   import { push } from "svelte-spa-router";
   import { vaultStore } from "../stores";
-  import {
-    getModalStore,
-    type ModalSettings,
-  } from "@skeletonlabs/skeleton";
+  import { getModalStore, type ModalSettings } from "@skeletonlabs/skeleton";
 
   const modalStore = getModalStore();
   let vaults: string[] = [];
 
   const listVaults = async () => {
     vaults = await invoke("list_vaults");
-    console.log(vaults);
   };
 
   const selectVault = (vault: string) => {
@@ -42,16 +38,6 @@
     >
     <ul class="bg-surface-800">
       {#each vaults as vault}
-        <li class="odd:bg-surface-700 p-2 card card-hover">
-          <button on:click={() => selectVault(vault)}>
-            {vault.split("/").slice(-1)}
-          </button>
-        </li>
-        <li class="odd:bg-surface-700 p-2 card card-hover">
-          <button on:click={() => selectVault(vault)}>
-            {vault.split("/").slice(-1)}
-          </button>
-        </li>
         <li class="odd:bg-surface-700 p-2 card card-hover">
           <button on:click={() => selectVault(vault)}>
             {vault.split("/").slice(-1)}

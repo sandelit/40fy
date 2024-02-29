@@ -52,6 +52,7 @@ impl Database {
     }
 
     fn create_table(&self) -> Result<(), rusqlite::Error> {
+        self.conn.execute("PRAGMA foreign_keys", params![]);
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS MasterPassword(
                 id INTEGER PRIMARY KEY,
