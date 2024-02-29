@@ -32,7 +32,7 @@ fn add_password(
 
     // Insert a new user into the `user` table
     conn.execute(
-        "INSERT INTO passwords (id, title, url, username, email, password) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        "INSERT INTO Password (id, title, url, username, email, password) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         params![id, title, url, username, email, password],
     )
     .map_err(|e| e.to_string())?;
@@ -98,6 +98,13 @@ fn list_vaults() -> Result<Vec<String>, String> {
 }
 
 #[tauri::command]
+fn add_vault(name: &str, password: &str) -> () {
+    println!("{}, {}", name, password);
+
+    
+}
+
+#[tauri::command]
 fn select_database(dbPath: &str) -> Result<String, String> {
     println!("{}", dbPath);
     Ok(dbPath.to_string())
@@ -111,6 +118,7 @@ fn main() {
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
             add_password,
+            add_vault,
             list_vaults,
             read_passwords,
             select_database,

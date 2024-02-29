@@ -46,26 +46,16 @@ impl Database {
         let conn = Connection::open("./passwords.db")?;
         let db = Database { conn };
 
-        db.create_tables();
+        db.create_table();
 
         Ok(db)
     }
 
-    fn create_tables(&self) -> Result<(), rusqlite::Error> {
+    fn create_table(&self) -> Result<(), rusqlite::Error> {
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS MasterPassword(
                 id INTEGER PRIMARY KEY,
                 password TEXT NOT NULL
-            )",
-        [])?;
-        self.conn.execute(
-            "CREATE TABLE IF NOT EXISTS Password(
-                id INTEGER PRIMARY KEY,
-                title TEXT NOT NULL,
-                url TEXT,
-                username TEXT,
-                email TEXT,
-                password TEXT 
             )",
         [])?;
 

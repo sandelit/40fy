@@ -2,9 +2,20 @@
   import Dashboard from "./lib/pages/Dashboard.svelte";
   import LoginPage from "./lib/pages/LoginPage.svelte";
   import HomePage from "./lib/pages/HomePage.svelte";
-  import CreateDbPage from "./lib/pages/CreateDbPage.svelte";
-  import TopBar from "./lib/components/TopBar.svelte";
   import Router from "svelte-spa-router";
+  import {
+    Modal,
+    initializeStores,
+    type ModalComponent,
+  } from "@skeletonlabs/skeleton";
+  import AddVaultModal from "./lib/components/modals/AddVaultModal.svelte";
+
+  const modalRegistry: Record<string, ModalComponent> = {
+    // Set a unique modal ID, then pass the component reference
+    addVaultModal: { ref: AddVaultModal },
+  };
+
+  initializeStores();
 
   let db = true;
   let auth = false;
@@ -17,6 +28,7 @@
 </script>
 
 <main class="h-screen overflow-y-hidden">
+  <Modal components={modalRegistry} />
   <Router {routes} />
 </main>
 <!-- 
