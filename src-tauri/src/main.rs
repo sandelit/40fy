@@ -4,7 +4,7 @@
 mod db;
 
 use crate::db::Database;
-use db::Password;
+use db::VaultEntry;
 use rusqlite::ErrorCode;
 use rusqlite::{params, Connection, Result};
 use std::fs;
@@ -41,7 +41,7 @@ fn add_password(
 }
 
 #[tauri::command]
-fn read_passwords(database: &str) -> Result<Vec<Password>, String> {
+fn read_passwords(database: &str) -> Result<Vec<VaultEntry>, String> {
     let conn = Connection::open(database.to_string()).map_err(|e| e.to_string())?;
 
     let mut stmt = conn
@@ -49,7 +49,7 @@ fn read_passwords(database: &str) -> Result<Vec<Password>, String> {
         .map_err(|e| e.to_string())?;
     let password_iter = stmt
         .query_map([], |row| {
-            Ok(Password {
+            Ok(VaultEntry {
                 id: row.get(0)?,
                 title: row.get(1)?,
                 url: row.get(2)?,
@@ -99,14 +99,17 @@ fn list_vaults() -> Result<Vec<String>, String> {
 
 #[tauri::command]
 fn add_vault(name: &str, password: &str) -> Result<(), String> {
-    // Basic validation for table name to prevent SQL injections.
-    // Adjust the regex to match your application's requirements for table names.
-
-    println!("{}, {}", name, password);
     let conn = rusqlite::Connection::open("./passwords.db")
         .map_err(|e| e.to_string())?;
+    
+    // Insert into master table and get the ID from it
+    conn.execute(
+        "INSERT INTO MasterPassword (password) VALUES (?1)",
+        &[&password],
+    )
+    .map_err(|e| e.to_string())?;
 
-    // Fixed SQL syntax
+    //Create new user-generated table using the master_password_id as a foreign key
     let statement = format!("CREATE TABLE IF NOT EXISTS {} (
         id INTEGER PRIMARY KEY,
         master_password INTEGER,
@@ -125,9 +128,49 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn select_database(dbPath: &str) -> Result<String, String> {
-    println!("{}", dbPath);
-    Ok(dbPath.to_string())
+fn select_vault(vault_name: &str) -> Result<Vec<VaultEntry>, String> {
+    let conn = rusqlite::Connection::open("./passwords.db")
+        .map_err(|e| e.to_string())?;
+
+    // Verify the master password
+    let mut stmt = conn.prepare(
+        "SELECT id FROM MasterPassword WHERE password = ?1",
+    )
+    .map_err(|e| e.to_string())?;
+
+    let master_password_ids: Vec<i64> = stmt.query_map([master_password], |row| row.get(0))
+        .map_err(|e| e.to_string())?
+        .collect::<Result<_, _>>()
+        .map_err(|e| e.to_string())?;
+    
+    if master_password_ids.is_empty() {
+        return Err("Incorrect master password".to_string());
+    }
+
+    // Assuming master_password_id is unique and correctly referenced in the user table
+    let master_password_id = master_password_ids[0];
+
+    // Query the user-generated table
+    let sql = format!("SELECT * FROM {} WHERE master_password = {}", vault_name, master_password_id);
+    let mut stmt = conn.prepare(&sql)
+        .map_err(|e| e.to_string())?;
+    
+    let rows = stmt.query_map([master_password_id], |row| {
+        // Map the row into your data structure
+    Ok(VaultEntry {
+        id: row.get(0)?,
+        title: row.get(1)?,
+        url: row.get(2)?,
+        username: row.get(3)?,
+        email: row.get(4)?,
+        password: row.get(5)?,
+        })
+    })
+    .map_err(|e| e.to_string())?
+    .collect::<Result<Vec<VaultEntry>, _>>()
+    .map_err(|e| e.to_string())?;
+
+    Ok(rows)
 }
 
 fn main() {
@@ -141,7 +184,7 @@ fn main() {
             add_vault,
             list_vaults,
             read_passwords,
-            select_database,
+            select_vault,
             authorize
         ])
         .run(tauri::generate_context!())

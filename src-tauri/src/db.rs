@@ -3,15 +3,16 @@ use std::path::Path;
 use rusqlite::{params, Connection};
 
 #[derive(Debug, serde::Serialize)]
-pub struct Password {
+pub struct VaultEntry {
     pub id: usize,
     pub title: String,
-    pub url: String,
-    pub username: String,
-    pub email: String,
+    pub url: Option<String>,
+    pub username: Option<String>,
+    pub email: Option<String>,
     pub password: String,
 }
 
+/*
 impl Password {
     pub fn new(
         id: usize,
@@ -31,6 +32,7 @@ impl Password {
         }
     }
 }
+*/
 
 #[derive(Debug)]
 pub struct Database {
@@ -52,7 +54,7 @@ impl Database {
     }
 
     fn create_table(&self) -> Result<(), rusqlite::Error> {
-        self.conn.execute("PRAGMA foreign_keys", params![]);
+        self.conn.execute("PRAGMA foreign_keys", params![])?;
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS MasterPassword(
                 id INTEGER PRIMARY KEY,
