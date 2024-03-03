@@ -10,16 +10,16 @@
 
   /////////////////////////////
   const addEntry = () => {
-    let vault = $vaultStore.vault;
+    let vault = $vaultStore;
 
-    invoke("add_password", {
-      id: "12341112",
+    invoke("add_vault_entry", {
       title: "tttttttt",
       url: "www.com",
       username: "userrrrr",
       email: "user@user.com",
       password: "123en",
-      vault,
+      masterPasswordId: "1",
+      vault: vault + "",
     });
     dispatch("entryAdded");
   };

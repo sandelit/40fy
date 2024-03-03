@@ -9,23 +9,6 @@
     [key: string]: Entry[];
   };
 
-  entries.push({
-    id: "12",
-    title: "test",
-    url: "test",
-    username: "testtest",
-    email: "testsson@",
-    password: "123",
-  });
-  entries.push({
-    id: "12",
-    title: "fest",
-    url: "test",
-    username: "festtest",
-    email: "festsson@",
-    password: "123",
-  });
-
   const sortedEntries = entries.sort((a, b) => a.title.localeCompare(b.title));
 
   const groups = sortedEntries.reduce((acc: GroupedEntries, entry: Entry) => {
@@ -43,7 +26,7 @@
 </script>
 
 <div
-  class="w-64 flex flex-col h-screen bg-surface-800 drop-shadow-xl overflow-y-scroll "
+  class="w-64 flex flex-col h-screen bg-surface-800 drop-shadow-xl overflow-y-scroll"
 >
   <div>filterbar</div>
 

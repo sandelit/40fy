@@ -1,7 +1,4 @@
 import { localStorageStore } from "@skeletonlabs/skeleton";
-import type { Writable } from "svelte/store";
+import { writable, type Writable } from "svelte/store";
 
-export const vaultStore: Writable<string> = localStorageStore(
-  "vault",
-  "",
-);
+export const vaultStore: Writable<string> = writable("")

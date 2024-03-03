@@ -10,6 +10,7 @@ pub struct VaultEntry {
     pub username: Option<String>,
     pub email: Option<String>,
     pub password: String,
+    pub master_password_id: usize,
 }
 
 /*
@@ -41,7 +42,7 @@ pub struct Database {
 
 impl Database {
     pub fn connect() -> Result<Connection, rusqlite::Error> {
-        return Ok(Connection::open("./passwords.db")?)
+        return Ok(Connection::open("./passwords.db")?);
     }
 
     pub fn init() -> Result<Database, rusqlite::Error> {
@@ -60,7 +61,8 @@ impl Database {
                 id INTEGER PRIMARY KEY,
                 password TEXT NOT NULL
             )",
-        [])?;
+            [],
+        )?;
 
         Ok(())
     }

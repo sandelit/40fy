@@ -12,20 +12,53 @@
     vaults = await invoke("list_vaults");
   };
 
-  const selectVault = (vault: string) => {
-    vaultStore.set({ vault });
-    push("/login?data=" + vault);
+  const selectVault = (name: string) => {
+    const selectVaultModal: ModalSettings = {
+      type: "prompt",
+      title: "Password",
+      body: "Provide password for the selected vault",
+      value: "",
+      valueAttr: { type: "text", required: true },
+      response: async (masterPassword: string) => {
+        if (masterPassword) {
+          try {
+            const vault = await invoke("select_vault", {
+              name: name?.toLowerCase(),
+              masterPassword,
+            });
+
+            console.log(name);
+            vaultStore.set(name);
+
+            push("/dashboard");
+
+            console.log(vault);
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      },
+    };
+    modalStore.trigger(selectVaultModal);
   };
 
   const addVault = () => {
-    const modal: ModalSettings = {
+    const addVaultModal: ModalSettings = {
       type: "component",
       title: "New Vault",
       component: "addVaultModal",
-      response: ({ name, password }) =>
-        invoke("add_vault", { name: name?.toLowerCase(), password }),
+      response: ({ name, password }) => {
+        if (name && password) {
+          if (vaults.includes(name)) {
+            console.log("Vault already exists");
+            return;
+          }
+          invoke("add_vault", { name: name?.toLowerCase(), password });
+          listVaults();
+        }
+      },
     };
-    modalStore.trigger(modal);
+    modalStore.trigger(addVaultModal);
   };
 
   onMount(listVaults);

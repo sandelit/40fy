@@ -9,16 +9,16 @@
 
   let selectedEntry: Entry | null = null;
 
-  const readPassword = async (): Promise<Entry[]> => {
-    return invoke("read_passwords", { vault: $vaultStore.vault });
+  const readEntries = async (): Promise<Entry[]> => {
+    return invoke("read_entries", { vault: $vaultStore });
   };
 
-  let entriesPromise = readPassword();
+  let entriesPromise = readEntries();
 </script>
 
 <TopBar
   on:entryAdded={() => {
-    entriesPromise = readPassword();
+    entriesPromise = readEntries();
   }}
 />
 <div class="flex">

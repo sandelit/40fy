@@ -18,22 +18,33 @@ struct User {
 }
 
 #[tauri::command]
-fn add_password(
-    id: &str,
-    title: &str,
-    url: &str,
-    username: &str,
-    email: &str,
-    password: &str,
-    database: &str,
+fn add_vault_entry(
+    title: String,
+    url: String,
+    username: String,
+    email: String,
+    password: String,
+    master_password_id: String,
+    vault: String,
 ) -> Result<(), String> {
     // Connect to the database (consider using a more efficient way in a real app)
-    let conn = Connection::open(database.to_string()).map_err(|e| e.to_string())?;
+    let conn = Connection::open("./passwords.db").map_err(|e| e.to_string())?;
 
-    // Insert a new user into the `user` table
+    let sql = format!(
+        "INSERT INTO {} (master_password_id, title, url, username, email, password) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        vault
+    );
+
     conn.execute(
-        "INSERT INTO Password (id, title, url, username, email, password) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-        params![id, title, url, username, email, password],
+        &sql,
+        [
+            master_password_id,
+            title,
+            url,
+            username,
+            email,
+            password,
+        ],
     )
     .map_err(|e| e.to_string())?;
 
@@ -41,13 +52,19 @@ fn add_password(
 }
 
 #[tauri::command]
-fn read_passwords(database: &str) -> Result<Vec<VaultEntry>, String> {
-    let conn = Connection::open(database.to_string()).map_err(|e| e.to_string())?;
+fn read_entries(vault: &str) -> Result<Vec<VaultEntry>, String> {
+    let conn = Connection::open("./passwords.db").map_err(|e| e.to_string())?;
+
+
+    let sql = format!(
+        "SELECT id, title, url, username, email, password, master_password_id FROM {}",
+        vault
+    );
 
     let mut stmt = conn
-        .prepare("SELECT id, title, url, username, email, password FROM passwords")
+        .prepare(&sql)
         .map_err(|e| e.to_string())?;
-    let password_iter = stmt
+    let entry_iter = stmt
         .query_map([], |row| {
             Ok(VaultEntry {
                 id: row.get(0)?,
@@ -56,52 +73,45 @@ fn read_passwords(database: &str) -> Result<Vec<VaultEntry>, String> {
                 username: row.get(3)?,
                 email: row.get(4)?,
                 password: row.get(5)?,
+                master_password_id: row.get(6)?,
             })
         })
         .map_err(|e| e.to_string())?;
 
-    let mut passwords = Vec::new();
-    for password in password_iter {
-        passwords.push(password.map_err(|e| e.to_string())?);
+    let mut entries = Vec::new();
+    for entry in entry_iter {
+        entries.push(entry.map_err(|e| e.to_string())?);
     }
 
-    Ok(passwords)
-}
-
-#[tauri::command]
-fn authorize(password: &str, database: &str) -> String {
-    unimplemented!();
+    Ok(entries)
 }
 
 #[tauri::command]
 fn list_vaults() -> Result<Vec<String>, String> {
     // Attempt to connect to the SQLite database
-    let conn = Connection::open("./passwords.db")
-        .map_err(|e| e.to_string())?;
+    let conn = Connection::open("./passwords.db").map_err(|e| e.to_string())?;
 
     // Prepare the SQL query to select all user-created table names
-    let mut statement = conn.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'MasterPassword'")
+    let mut statement = conn
+        .prepare(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'MasterPassword'",
+        )
         .map_err(|e| e.to_string())?;
 
     // Execute the query and collect table names into a Vec<String>
-    let tables = statement.query_map([], |row| {
-        Ok(row.get::<_, String>(0)?)
-    })
-    .map_err(|e| e.to_string())?
-    .collect::<Result<Vec<String>, _>>()
-    .map_err(|e| e.to_string())?;
+    let tables = statement
+        .query_map([], |row| Ok(row.get::<_, String>(0)?))
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<String>, _>>()
+        .map_err(|e| e.to_string())?;
 
-    for table in &tables {
-        println!("Table: {}", table);
-    }
     Ok(tables)
 }
 
 #[tauri::command]
 fn add_vault(name: &str, password: &str) -> Result<(), String> {
-    let conn = rusqlite::Connection::open("./passwords.db")
-        .map_err(|e| e.to_string())?;
-    
+    let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
+
     // Insert into master table and get the ID from it
     conn.execute(
         "INSERT INTO MasterPassword (password) VALUES (?1)",
@@ -110,16 +120,19 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
     .map_err(|e| e.to_string())?;
 
     //Create new user-generated table using the master_password_id as a foreign key
-    let statement = format!("CREATE TABLE IF NOT EXISTS {} (
+    let statement = format!(
+        "CREATE TABLE IF NOT EXISTS {} (
         id INTEGER PRIMARY KEY,
-        master_password INTEGER,
+        master_password_id INTEGER,
         title TEXT NOT NULL,
         url TEXT,
         username TEXT,
         email TEXT,
         password TEXT,
-        FOREIGN KEY(master_password) REFERENCES MasterPassword(id)
-    )", name);
+        FOREIGN KEY(master_password_id) REFERENCES MasterPassword(id)
+    )",
+        name
+    );
 
     conn.execute(&statement, rusqlite::params![])
         .map_err(|e| e.to_string())?;
@@ -128,21 +141,20 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn select_vault(vault_name: &str) -> Result<Vec<VaultEntry>, String> {
-    let conn = rusqlite::Connection::open("./passwords.db")
-        .map_err(|e| e.to_string())?;
+fn select_vault(name: &str, master_password: &str) -> Result<Vec<VaultEntry>, String> {
+    let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
 
     // Verify the master password
-    let mut stmt = conn.prepare(
-        "SELECT id FROM MasterPassword WHERE password = ?1",
-    )
-    .map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT id FROM MasterPassword WHERE password = ?1")
+        .map_err(|e| e.to_string())?;
 
-    let master_password_ids: Vec<i64> = stmt.query_map([master_password], |row| row.get(0))
+    let master_password_ids: Vec<i64> = stmt
+        .query_map([master_password], |row| row.get(0))
         .map_err(|e| e.to_string())?
         .collect::<Result<_, _>>()
         .map_err(|e| e.to_string())?;
-    
+
     if master_password_ids.is_empty() {
         return Err("Incorrect master password".to_string());
     }
@@ -151,24 +163,27 @@ fn select_vault(vault_name: &str) -> Result<Vec<VaultEntry>, String> {
     let master_password_id = master_password_ids[0];
 
     // Query the user-generated table
-    let sql = format!("SELECT * FROM {} WHERE master_password = {}", vault_name, master_password_id);
-    let mut stmt = conn.prepare(&sql)
-        .map_err(|e| e.to_string())?;
-    
-    let rows = stmt.query_map([master_password_id], |row| {
-        // Map the row into your data structure
-    Ok(VaultEntry {
-        id: row.get(0)?,
-        title: row.get(1)?,
-        url: row.get(2)?,
-        username: row.get(3)?,
-        email: row.get(4)?,
-        password: row.get(5)?,
+    let sql = format!(
+        "SELECT * FROM {} WHERE master_password_id = {}",
+        name, master_password_id
+    );
+    let mut stmt = conn.prepare(&sql).map_err(|e| e.to_string())?;
+
+    let rows = stmt
+        .query_map([], |row| {
+            Ok(VaultEntry {
+                id: row.get(0)?,
+                master_password_id: row.get(1)?,
+                title: row.get(2)?,
+                url: row.get(3)?,
+                username: row.get(4)?,
+                email: row.get(5)?,
+                password: row.get(6)?,
+            })
         })
-    })
-    .map_err(|e| e.to_string())?
-    .collect::<Result<Vec<VaultEntry>, _>>()
-    .map_err(|e| e.to_string())?;
+        .map_err(|e| e.to_string())?
+        .collect::<Result<Vec<VaultEntry>, _>>()
+        .map_err(|e| e.to_string())?;
 
     Ok(rows)
 }
@@ -180,12 +195,11 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![
-            add_password,
+            add_vault_entry,
             add_vault,
             list_vaults,
-            read_passwords,
+            read_entries,
             select_vault,
-            authorize
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
