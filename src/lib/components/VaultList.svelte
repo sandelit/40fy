@@ -22,17 +22,12 @@
       response: async (masterPassword: string) => {
         if (masterPassword) {
           try {
-            const vault = await invoke("select_vault", {
+            let masterPasswordId = await invoke("select_vault", {
               name: name?.toLowerCase(),
               masterPassword,
             });
-
-            console.log(name);
-            vaultStore.set(name);
-
+            vaultStore.set({ name, masterPasswordId });
             push("/dashboard");
-
-            console.log(vault);
           } catch (error) {
             console.log(error);
           }

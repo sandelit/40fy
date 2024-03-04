@@ -58,7 +58,7 @@ fn read_entries(vault: &str) -> Result<Vec<VaultEntry>, String> {
 
     let sql = format!(
         "SELECT id, title, url, username, email, password, master_password_id FROM {}",
-        vault
+        &vault
     );
 
     let mut stmt = conn
@@ -112,6 +112,15 @@ fn list_vaults() -> Result<Vec<String>, String> {
 fn add_vault(name: &str, password: &str) -> Result<(), String> {
     let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
 
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS MasterPassword(
+                id INTEGER PRIMARY KEY,
+                password TEXT NOT NULL
+            )",
+            [],
+        )
+    .map_err(|e| e.to_string())?;
+
     // Insert into master table and get the ID from it
     conn.execute(
         "INSERT INTO MasterPassword (password) VALUES (?1)",
@@ -141,7 +150,7 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
 }
 
 #[tauri::command]
-fn select_vault(name: &str, master_password: &str) -> Result<Vec<VaultEntry>, String> {
+fn select_vault(name: &str, master_password: &str) -> Result<String, String> {
     let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
 
     // Verify the master password
@@ -185,7 +194,7 @@ fn select_vault(name: &str, master_password: &str) -> Result<Vec<VaultEntry>, St
         .collect::<Result<Vec<VaultEntry>, _>>()
         .map_err(|e| e.to_string())?;
 
-    Ok(rows)
+    Ok(master_password_id.to_string())
 }
 
 fn main() {

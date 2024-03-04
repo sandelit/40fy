@@ -10,7 +10,9 @@
   let selectedEntry: Entry | null = null;
 
   const readEntries = async (): Promise<Entry[]> => {
-    return invoke("read_entries", { vault: $vaultStore });
+    let vault = await $vaultStore.name;
+    console.log($vaultStore)
+    return invoke("read_entries", { vault});
   };
 
   let entriesPromise = readEntries();

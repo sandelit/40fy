@@ -9,10 +9,12 @@
     type ModalComponent,
   } from "@skeletonlabs/skeleton";
   import AddVaultModal from "./lib/components/modals/AddVaultModal.svelte";
+    import AddEntryModal from "./lib/components/modals/AddEntryModal.svelte";
 
   const modalRegistry: Record<string, ModalComponent> = {
     // Set a unique modal ID, then pass the component reference
     addVaultModal: { ref: AddVaultModal },
+    addEntryModal: { ref: AddEntryModal },
   };
 
   initializeStores();
