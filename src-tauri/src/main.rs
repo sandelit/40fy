@@ -124,7 +124,7 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
     let statement = format!(
         "CREATE TABLE IF NOT EXISTS {} (
         id INTEGER PRIMARY KEY,
-        master_password_id INTEGER,
+        master_password_id TEXT,
         title TEXT NOT NULL,
         url TEXT,
         username TEXT,
