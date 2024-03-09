@@ -59,7 +59,7 @@ impl Database {
         self.conn.execute("PRAGMA foreign_keys", params![])?;
         self.conn.execute(
             "CREATE TABLE IF NOT EXISTS MasterPassword(
-                id INTEGER PRIMARY KEY,
+                id TEXT PRIMARY KEY,
                 password TEXT NOT NULL
             )",
             [],
