@@ -9,7 +9,13 @@
   let vaults: string[] = [];
 
   const listVaults = async () => {
-    vaults = await invoke("list_vaults");
+    invoke("list_vaults")
+      .then((response) => {
+        vaults = response;
+      })
+      .catch((error) => {
+        console.log("Error:", error);
+      });
   };
 
   const selectVault = (name: string) => {
@@ -48,7 +54,14 @@
             console.log("Vault already exists");
             return;
           }
-          invoke("add_vault", { name: name?.toLowerCase(), password });
+          invoke("add_vault", { name: name?.toLowerCase(), password })
+            .then(() => {
+              console.log("New vault successfully added");
+            })
+            .catch((error) => {
+              console.log("Failed to create new vault");
+              console.log("Error", error);
+            });
           listVaults();
         }
       },

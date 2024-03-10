@@ -116,7 +116,7 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
     // Insert into master table and get the ID from it
     conn.execute(
         "INSERT INTO MasterPassword (password, id) VALUES (?1, ?2)",
-        params![password, id]
+        params![password, id],
     )
     .map_err(|e| e.to_string())?;
 
@@ -145,19 +145,18 @@ fn add_vault(name: &str, password: &str) -> Result<(), String> {
 fn select_vault(name: &str, master_password: &str) -> Result<String, String> {
     let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
 
-    // Verify the master password
-    let master_password_id: i64 = conn
-        .query_row(
-            "SELECT id FROM MasterPassword WHERE password = ?1",
-            rusqlite::params![master_password],
-            |row| row.get(0),
-        )
-        .map_err(|e| e.to_string())?;
+    // Attempt to verify the master password and get its UUID
+    let result = conn.query_row(
+        "SELECT id FROM MasterPassword WHERE password = ?1",
+        rusqlite::params![master_password],
+        |row| row.get::<_, String>(0),
+    );
 
-    if master_password_id == 0 {
-        return Err("Incorrect master password".to_string());
+    match result {
+        Ok(master_password_id) => Ok(master_password_id),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Err("Incorrect master password".to_string()),
+        Err(e) => Err(e.to_string()),
     }
-    Ok(master_password_id.to_string())
 }
 
 fn main() {

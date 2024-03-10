@@ -10,7 +10,7 @@ pub struct VaultEntry {
     pub username: Option<String>,
     pub email: Option<String>,
     pub password: String,
-    pub master_password_id: usize,
+    pub master_password_id: String,
 }
 
 /*

@@ -33,8 +33,9 @@
             vault,
           });
           dispatch("entryAdded");
-        } catch (e) {
-          console.log(e);
+        } catch (error) {
+          console.log("Failed to create new entry");
+          console.log("Error:", error);
         }
       },
     };
