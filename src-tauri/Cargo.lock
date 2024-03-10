@@ -1172,6 +1172,7 @@ name = "fortify"
 version = "0.0.0"
 dependencies = [
  "dirs",
+ "regex",
  "rusqlite",
  "serde",
  "serde_derive",

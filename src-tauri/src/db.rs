@@ -1,39 +1,19 @@
-use std::path::Path;
-
+use regex::Regex;
 use rusqlite::{params, Connection};
+use uuid::Uuid;
 
 #[derive(Debug, serde::Serialize)]
 pub struct VaultEntry {
-    pub id: usize,
+    pub id: String,
     pub title: String,
-    pub url: Option<String>,
-    pub username: Option<String>,
-    pub email: Option<String>,
+    pub url: String,
+    pub username: String,
+    pub email: String,
     pub password: String,
     pub master_password_id: String,
+    pub created_at_date_time: String,
+    pub updated_at_date_time: String,
 }
-
-/*
-impl Password {
-    pub fn new(
-        id: usize,
-        title: String,
-        url: String,
-        username: String,
-        email: String,
-        password: String,
-    ) -> Password {
-        Password {
-            id,
-            title,
-            url,
-            username,
-            email,
-            password,
-        }
-    }
-}
-*/
 
 #[derive(Debug)]
 pub struct Database {
@@ -41,16 +21,10 @@ pub struct Database {
 }
 
 impl Database {
-    pub fn connect() -> Result<Connection, rusqlite::Error> {
-        return Ok(Connection::open("./passwords.db")?);
-    }
-
     pub fn init() -> Result<Database, rusqlite::Error> {
         let conn = Connection::open("./passwords.db")?;
         let db = Database { conn };
-
         db.create_table();
-
         Ok(db)
     }
 
@@ -67,76 +41,154 @@ impl Database {
 
         Ok(())
     }
-}
 
-/*
-impl Database {
-    pub fn new(key: String) -> Result<Database, rusqlite::Error> {
-        let conn = Connection::open("passwords.db")?;
-        // set password to our database. without this passphrase database is not readable
-        //conn.pragma_update(Some(DatabaseName::Main), "KEY", key)?;
-        let db = Database { conn };
-        db.create_table()?;
-        Ok(db)
+    fn is_valid_table_name(name: &str) -> bool {
+        let re = Regex::new(r"^[a-zA-Z][a-zA-Z0-9_]*$").unwrap();
+        re.is_match(name)
     }
 
-    pub fn create_table(&self) -> Result<(), rusqlite::Error> {
-        self.conn.execute_batch(
-            "CREATE TABLE IF NOT EXISTS passwords(
-                    id INTEGER PRIMARY KEY,
-                    title TEXT NOT NULL,
-                    url TEXT,
-                    username TEXT,
-                    email TEXT,
-                    password TEXT NOT NULL
-                )
-            ",
-        )?;
+    pub fn connection() -> Result<Connection, String> {
+        let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
+        return Ok(conn);
+    }
+
+    pub fn add_vault_entry(
+        &self,
+        vault: String,
+        title: String,
+        url: String,
+        username: String,
+        email: String,
+        password: String,
+        master_password_id: String,
+    ) -> Result<(), String> {
+        let sql = format!(
+        "INSERT INTO {} (id, master_password_id, title, url, username, email, password, createdAtDateTime, lastUpdatedAtDateTime) 
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'), datetime('now'))",
+        vault
+    );
+
+        let id = Uuid::new_v4().to_string();
+        self.conn
+            .execute(
+                &sql,
+                [
+                    id,
+                    master_password_id,
+                    title,
+                    url,
+                    username,
+                    email,
+                    password,
+                ],
+            )
+            .map_err(|e| e.to_string())?;
+
         Ok(())
     }
 
-    pub fn load(&self) -> Vec<Password> {
-        let mut statement = self.conn.prepare("select * from passwords").unwrap();
-        let items: Vec<Password> = statement
+    pub fn read_entries(&self, vault: &str) -> Result<Vec<VaultEntry>, String> {
+        if !Database::is_valid_table_name(vault) {
+            return Err("Invalid table name".to_string());
+        }
+
+        let sql = format!("SELECT * FROM {}", vault);
+        let mut stmt = self.conn.prepare(&sql).map_err(|e| e.to_string())?;
+
+        let entry_iter = stmt
             .query_map([], |row| {
-                let password = Password::new_with_id(
-                    row.get("id").unwrap(),
-                    row.get("title").unwrap(),
-                    row.get("url").unwrap(),
-                    row.get("username").unwrap(),
-                    row.get("email").unwrap(),
-                    row.get("password").unwrap(),
-                );
-                Ok(password)
+                Ok(VaultEntry {
+                    id: row.get(0)?,
+                    master_password_id: row.get(1)?,
+                    title: row.get(2)?,
+                    url: row.get(3)?,
+                    username: row.get(4)?,
+                    email: row.get(5)?,
+                    password: row.get(6)?,
+                    created_at_date_time: row.get(7)?,
+                    updated_at_date_time: row.get(8)?,
+                })
             })
-            .unwrap()
-            .map(|i| i.unwrap())
-            .collect();
-        items
+            .map_err(|e| e.to_string())?;
+
+        let entries: Result<Vec<VaultEntry>, _> = entry_iter.collect();
+        entries.map_err(|e| e.to_string())
     }
 
-    pub fn insert(&self, password: &Password) {
-        self.conn
-            .execute(
-                "insert into passwords (title, username, password) values (?1, ?2, ?3)",
-                params![password.title, password.username, password.password],
-            )
-            .unwrap();
+    pub fn list_vaults(&self) -> Result<Vec<String>, String> {
+        // Prepare the SQL query to select all user-created table names
+        let mut statement = self.conn
+        .prepare(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'MasterPassword'",
+        )
+        .map_err(|e| e.to_string())?;
+
+        // Execute the query and collect table names into a Vec<String>
+        let tables = statement
+            .query_map([], |row| Ok(row.get::<_, String>(0)?))
+            .map_err(|e| e.to_string())?
+            .collect::<Result<Vec<String>, _>>()
+            .map_err(|e| e.to_string())?;
+
+        Ok(tables)
     }
 
-    pub fn update(&self, id: usize, password: &Password) {
-        self.conn
-            .execute(
-                "update passwords set title=?1, username=?2, password=?3 where id=?4",
-                params![password.title, password.username, password.password, id],
-            )
-            .unwrap();
+    pub fn add_vault(&self, name: &str, password: &str) -> Result<(), String> {
+        let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
+
+        conn.execute(
+            "CREATE TABLE IF NOT EXISTS MasterPassword(
+                id TEXT PRIMARY KEY,
+                password TEXT NOT NULL
+            )",
+            [],
+        )
+        .map_err(|e| e.to_string())?;
+
+        let id = Uuid::new_v4().to_string();
+        // Insert into master table and get the ID from it
+        conn.execute(
+            "INSERT INTO MasterPassword (password, id) VALUES (?1, ?2)",
+            params![password, id],
+        )
+        .map_err(|e| e.to_string())?;
+
+        //Create new user-generated table using the master_password_id as a foreign key
+        let statement = format!(
+            "CREATE TABLE IF NOT EXISTS {} (
+            id TEXT PRIMARY KEY,
+            master_password_id TEXT,
+            title TEXT NOT NULL,
+            url TEXT,
+            username TEXT,
+            email TEXT,
+            password TEXT,
+            createdAtDateTime TEXT NOT NULL,
+            lastUpdatedAtDateTime TEXT NOT NULL,
+            FOREIGN KEY(master_password_id) REFERENCES MasterPassword(id)
+        )",
+            name
+        );
+
+        conn.execute(&statement, rusqlite::params![])
+            .map_err(|e| e.to_string())?;
+        Ok(())
     }
 
-    pub fn delete(&self, id: usize) {
-        self.conn
-            .execute("delete from passwords where id=?1", params![id])
-            .unwrap();
+    pub fn select_vault(&self, name: &str, master_password: &str) -> Result<String, String> {
+        // Attempt to verify the master password and get its UUID
+        let result = self.conn.query_row(
+            "SELECT id FROM MasterPassword WHERE password = ?1",
+            rusqlite::params![master_password],
+            |row| row.get::<_, String>(0),
+        );
+
+        match result {
+            Ok(master_password_id) => Ok(master_password_id),
+            Err(rusqlite::Error::QueryReturnedNoRows) => {
+                Err("Incorrect master password".to_string())
+            }
+            Err(e) => Err(e.to_string()),
+        }
     }
 }
- */
