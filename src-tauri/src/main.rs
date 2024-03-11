@@ -5,10 +5,7 @@ mod db;
 
 use crate::db::Database;
 use db::VaultEntry;
-use rusqlite::ErrorCode;
-use rusqlite::{params, Connection, Result};
-use std::fs;
-use std::path::Path;
+use rusqlite::Result;
 use std::sync::{Arc, Mutex};
 use tauri::State;
 

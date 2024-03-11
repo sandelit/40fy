@@ -1,3 +1,4 @@
+use bcrypt::{hash, verify, DEFAULT_COST};
 use regex::Regex;
 use rusqlite::{params, Connection};
 use uuid::Uuid;
@@ -146,10 +147,12 @@ impl Database {
         .map_err(|e| e.to_string())?;
 
         let id = Uuid::new_v4().to_string();
+        let hashed_password = hash_password(password)?;
+
         // Insert into master table and get the ID from it
         conn.execute(
             "INSERT INTO MasterPassword (password, id) VALUES (?1, ?2)",
-            params![password, id],
+            params![hashed_password, id],
         )
         .map_err(|e| e.to_string())?;
 
@@ -158,37 +161,74 @@ impl Database {
             "CREATE TABLE IF NOT EXISTS {} (
             id TEXT PRIMARY KEY,
             master_password_id TEXT,
-            title TEXT NOT NULL,
+            title TEXT,
             url TEXT,
             username TEXT,
             email TEXT,
             password TEXT,
-            createdAtDateTime TEXT NOT NULL,
-            lastUpdatedAtDateTime TEXT NOT NULL,
+            createdAtDateTime TEXT,
+            lastUpdatedAtDateTime TEXT,
             FOREIGN KEY(master_password_id) REFERENCES MasterPassword(id)
         )",
             name
         );
 
-        conn.execute(&statement, rusqlite::params![])
+        self.conn
+            .execute(&statement, rusqlite::params![])
             .map_err(|e| e.to_string())?;
+        self.add_vault_entry(
+            name.to_string(),
+            "".to_string(),
+            "".to_string(),
+            "".to_string(),
+            "".to_string(),
+            "".to_string(),
+            id,
+        );
         Ok(())
     }
 
-    pub fn select_vault(&self, name: &str, master_password: &str) -> Result<String, String> {
-        // Attempt to verify the master password and get its UUID
-        let result = self.conn.query_row(
-            "SELECT id FROM MasterPassword WHERE password = ?1",
-            rusqlite::params![master_password],
-            |row| row.get::<_, String>(0),
+    pub fn select_vault(&self, vault_name: &str, master_password: &str) -> Result<String, String> {
+        if !Database::is_valid_table_name(vault_name) {
+            return Err("Invalid table name".to_string());
+        }
+        let sql = format!("SELECT master_password_id FROM {} LIMIT 1", vault_name);
+        let master_password_id: Result<String, rusqlite::Error> =
+            self.conn.query_row(&sql, [], |row| row.get(0));
+
+        let master_password_id = match master_password_id {
+            Ok(id) => id,
+            Err(_) => return Err("Failed to fetch master_password_id".to_string()),
+        };
+
+        // Fetch the hashed master password using the obtained master_password_id
+        let hashed_password: Result<String, rusqlite::Error> = self.conn.query_row(
+            "SELECT password FROM MasterPassword WHERE id = ?1",
+            params![master_password_id],
+            |row| row.get(0),
         );
 
-        match result {
-            Ok(master_password_id) => Ok(master_password_id),
-            Err(rusqlite::Error::QueryReturnedNoRows) => {
-                Err("Incorrect master password".to_string())
-            }
-            Err(e) => Err(e.to_string()),
+        let hashed_password = match hashed_password {
+            Ok(password) => password,
+            Err(_) => return Err("Failed to fetch hashed master password".to_string()),
+        };
+
+        // Verify the provided master_password against the stored hash
+        if verify_password(master_password, &hashed_password).map_err(|e| e.to_string())? {
+            Ok(master_password_id)
+        } else {
+            Err("Incorrect master password".to_string())
         }
     }
+}
+
+fn hash_password(password: &str) -> Result<String, String> {
+    match hash(password, DEFAULT_COST) {
+        Ok(hashed_password) => Ok(hashed_password),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+fn verify_password(password: &str, hash: &str) -> Result<bool, String> {
+    verify(password, hash).map_err(|e| e.to_string())
 }

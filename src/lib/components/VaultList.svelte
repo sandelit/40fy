@@ -11,6 +11,7 @@
   const listVaults = async () => {
     invoke("list_vaults")
       .then((response) => {
+        console.log(response)
         vaults = response;
       })
       .catch((error) => {

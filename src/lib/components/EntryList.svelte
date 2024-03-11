@@ -4,11 +4,13 @@
 
   export let entries: Entry[];
   export let selectedEntry: Entry | null = null;
+  let filterTerm = ""
 
   type GroupedEntries = {
     [key: string]: Entry[];
   };
 
+  entries.shift();
   const sortedEntries = entries.sort((a, b) => a.title.localeCompare(b.title));
 
   const groups = sortedEntries.reduce((acc: GroupedEntries, entry: Entry) => {
@@ -28,7 +30,9 @@
 <div
   class="w-64 flex flex-col h-screen bg-surface-800 drop-shadow-xl overflow-y-scroll"
 >
-  <div>filterbar</div>
+  <div>
+    <input class="input" type="text" placeholder="Filter" bind:value={filterTerm}/>
+  </div>
 
   <ul class="flex-1">
     {#each Object.entries(groups) as [letter, entries]}
