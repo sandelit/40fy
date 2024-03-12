@@ -2,7 +2,6 @@
 
 40fy (fortify) is a desktop password manager application built to offer a simple, secure way to manage your passwords. Developed as a learning project in Rust and utilizing Tauri and SvelteKit, 40fy aims to provide a straightforward solution for password management across multiple vaults.
 ![dashboard](https://github.com/sandelit/40fy/blob/master/public/40fy.png)
-![vaultlist](https://github.com/sandelit/40fy/blob/master/public/40fy2.png)
 
 ### Features
 
