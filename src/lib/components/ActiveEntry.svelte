@@ -65,11 +65,13 @@
       </button>
     </div>
 
-    <div class="opacity-50 grid grid-cols-2 gap-x-4 w-3/4 mt-12">
-      <p class="text-right">Last modified:</p>
-      <p>2029.1</p>
-      <p class="text-right">Created:</p>
-      <p>2022.1</p>
-    </div>
+    {#if entry?.updated_at_date_time && entry?.created_at_date_time}
+      <div class="opacity-50 grid grid-cols-2 gap-x-4 mt-12">
+        <p class="text-right">Last modified:</p>
+        <p>{entry?.updated_at_date_time}</p>
+        <p class="text-right">Created:</p>
+        <p>{entry?.created_at_date_time}</p>
+      </div>
+    {/if}
   </div>
 </div>

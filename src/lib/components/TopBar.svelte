@@ -13,7 +13,6 @@
 
   export let searchBar = true;
 
-  /////////////////////////////
   const addEntry = () => {
     let vault = $vaultStore.name;
     let masterPasswordId = $vaultStore.masterPasswordId;

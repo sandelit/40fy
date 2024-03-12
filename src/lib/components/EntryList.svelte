@@ -23,6 +23,7 @@
   }, {} as GroupedEntries);
 
   const selectEntry = (entry: Entry) => {
+    console.log(entry)
     selectedEntry = entry;
   };
 </script>
@@ -31,7 +32,7 @@
   class="w-64 flex flex-col h-screen bg-surface-800 drop-shadow-xl overflow-y-scroll"
 >
   <div>
-    <input class="input" type="text" placeholder="Filter" bind:value={filterTerm}/>
+    <input class="hidden input" type="text" placeholder="Filter" bind:value={filterTerm}/>
   </div>
 
   <ul class="flex-1">
@@ -54,6 +55,7 @@
               width="w-12"
               rounded="rounded-2xl"
               background="bg-surface-600"
+              initials={entry.title?.[0]}
             />
             <p class="text-xl mx-4">{entry.title}</p>
           </button>

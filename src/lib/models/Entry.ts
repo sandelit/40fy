@@ -5,5 +5,7 @@ export type Entry = {
   username: string;
   email: string;
   password: string;
+  created_at_date_time: string | null;
+  updated_at_date_time: string | null;
 };
 

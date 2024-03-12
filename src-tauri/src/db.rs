@@ -71,7 +71,7 @@ impl Database {
         "INSERT INTO {} (id, master_password_id, title, url, username, email, password, createdAtDateTime, lastUpdatedAtDateTime) 
             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, datetime('now'), datetime('now'))",
         vault
-    );
+        );
 
         let id = Uuid::new_v4().to_string();
         self.conn
@@ -139,6 +139,10 @@ impl Database {
     }
 
     pub fn add_vault(&self, name: &str, password: &str) -> Result<(), String> {
+        if !Database::is_valid_table_name(name) {
+            return Err("Invalid table name".to_string());
+        }
+
         let path = get_database_path();
         let conn = rusqlite::Connection::open(path).map_err(|e| e.to_string())?;
 

@@ -25,7 +25,7 @@
       title: "Password",
       body: "Provide password for the selected vault",
       value: "",
-      valueAttr: { type: "text", required: true },
+      valueAttr: { type: "password", required: true },
       response: async (masterPassword: string) => {
         if (masterPassword) {
           try {
