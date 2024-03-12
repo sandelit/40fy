@@ -1,7 +1,9 @@
 use bcrypt::{hash, verify, DEFAULT_COST};
+use dirs::data_dir;
 use regex::Regex;
 use rusqlite::{params, Connection};
 use uuid::Uuid;
+use std::path::PathBuf;
 
 #[derive(Debug, serde::Serialize)]
 pub struct VaultEntry {
@@ -23,7 +25,8 @@ pub struct Database {
 
 impl Database {
     pub fn init() -> Result<Database, rusqlite::Error> {
-        let conn = Connection::open("./passwords.db")?;
+        let path = get_database_path();
+        let conn = Connection::open(path)?;
         let db = Database { conn };
         db.create_table();
         Ok(db)
@@ -49,7 +52,8 @@ impl Database {
     }
 
     pub fn connection() -> Result<Connection, String> {
-        let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
+        let path = get_database_path();
+        let conn = rusqlite::Connection::open(path).map_err(|e| e.to_string())?;
         return Ok(conn);
     }
 
@@ -135,7 +139,8 @@ impl Database {
     }
 
     pub fn add_vault(&self, name: &str, password: &str) -> Result<(), String> {
-        let conn = rusqlite::Connection::open("./passwords.db").map_err(|e| e.to_string())?;
+        let path = get_database_path();
+        let conn = rusqlite::Connection::open(path).map_err(|e| e.to_string())?;
 
         conn.execute(
             "CREATE TABLE IF NOT EXISTS MasterPassword(
@@ -232,3 +237,11 @@ fn hash_password(password: &str) -> Result<String, String> {
 fn verify_password(password: &str, hash: &str) -> Result<bool, String> {
     verify(password, hash).map_err(|e| e.to_string())
 }
+
+fn get_database_path() -> PathBuf {
+    let mut path = data_dir().expect("Could not find data directory");
+    path.push("40fy");
+    path.push("40fy.db");
+    path
+}
+
