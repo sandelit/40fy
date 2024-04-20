@@ -74,13 +74,13 @@
 </script>
 
 <div class="flex justify-center adjust mt-8">
-  <div class="p-6 rounded-3xl bg-surface-900">
-    <button class="btn variant-filled mb-4" on:click={addVault}
+  <div class="p-6 rounded-3xl bg-surface-400 dark:bg-surface-900">
+    <button class="btn bg-surface-100 dark:variant-filled mb-4" on:click={addVault}
       >Add New Vault</button
     >
-    <ul class="bg-surface-800">
+    <ul class="bg-surface-600 dark:bg-surface-800">
       {#each vaults as vault}
-        <li class="odd:bg-surface-700 p-2 card card-hover">
+        <li class="odd:bg-surface-300 dark:odd:bg-surface-700 p-2 card card-hover">
           <button on:click={() => selectVault(vault)}>
             {vault.split("/").slice(-1)}
           </button>

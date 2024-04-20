@@ -4,7 +4,7 @@
 
   export let entries: Entry[];
   export let selectedEntry: Entry | null = null;
-  let filterTerm = ""
+  let filterTerm = "";
 
   type GroupedEntries = {
     [key: string]: Entry[];
@@ -23,16 +23,21 @@
   }, {} as GroupedEntries);
 
   const selectEntry = (entry: Entry) => {
-    console.log(entry)
+    console.log(entry);
     selectedEntry = entry;
   };
 </script>
 
 <div
-  class="w-64 flex flex-col h-screen bg-surface-800 drop-shadow-xl overflow-y-scroll"
+  class="w-64 flex flex-col h-screen bg-surface-300 dark:bg-surface-800 drop-shadow-xl overflow-y-scroll"
 >
   <div>
-    <input class="hidden input" type="text" placeholder="Filter" bind:value={filterTerm}/>
+    <input
+      class="hidden input"
+      type="text"
+      placeholder="Filter"
+      bind:value={filterTerm}
+    />
   </div>
 
   <ul class="flex-1">
@@ -42,9 +47,9 @@
       </li>
       {#each entries as entry}
         <li
-          class="card-hover bg-surface-900 border border-x-2 border-surface-800 {entry ===
+          class="card-hover bg-surface-400 dark:bg-surface-900 border border-x-2 border-surface-300 dark:border-surface-800 {entry ===
           selectedEntry
-            ? 'active'
+            ? 'active border-surface-300'
             : ''}"
         >
           <button
@@ -67,6 +72,6 @@
 
 <style>
   .active {
-    background-color: #222;
+    background-color: #636f82;
   }
 </style>

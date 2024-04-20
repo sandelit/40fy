@@ -55,7 +55,7 @@
         placeholder="search"
         class="input p-2"
       />
-      <button class="btn variant-soft" on:click={addEntry}>+</button>
+      <button class="btn bg-surface-300 dark:variant-soft" on:click={addEntry}>+</button>
     </div>
   {/if}
   <LightSwitch rounded={"rounded-lg"} width={"w-16"} height={"h-8"} />

@@ -18,7 +18,7 @@
 
 <div class="flex-1 flex mt-16 justify-center">
   <div
-    class="h-fit rounded-2xl bg-surface-900 border border-opacity-80 border-surface-800 drop-shadow-xl p-12"
+    class="h-fit rounded-2xl bg-surface-300 dark:bg-surface-900 border border-opacity-80 border-surface-400 dark:border-surface-800 drop-shadow-xl p-12"
   >
     <div>
       <h1 class="text-center mb-12 text-2xl">

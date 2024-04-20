@@ -185,15 +185,16 @@ impl Database {
         self.conn
             .execute(&statement, rusqlite::params![])
             .map_err(|e| e.to_string())?;
-        self.add_vault_entry(
-            name.to_string(),
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-            "".to_string(),
-            id,
-        );
+    // Insert an initial empty entry after creating the new vault table
+    self.add_vault_entry(
+        name.to_string(),
+        "".to_string(), // Empty title
+        "".to_string(), // Empty url
+        "".to_string(), // Empty username
+        "".to_string(), // Empty email
+        "".to_string(), // Empty password
+        id,            // Use the master_password_id from above
+    ).map_err(|e| e.to_string())?;
         Ok(())
     }
 

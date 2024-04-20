@@ -8,7 +8,13 @@
     type ModalComponent,
   } from "@skeletonlabs/skeleton";
   import AddVaultModal from "./lib/components/modals/AddVaultModal.svelte";
-    import AddEntryModal from "./lib/components/modals/AddEntryModal.svelte";
+  import AddEntryModal from "./lib/components/modals/AddEntryModal.svelte";
+  import { onMount } from "svelte";
+  import { autoModeWatcher } from "@skeletonlabs/skeleton";
+
+  onMount(() => {
+    autoModeWatcher();
+  });
 
   const modalRegistry: Record<string, ModalComponent> = {
     addVaultModal: { ref: AddVaultModal },
@@ -23,7 +29,7 @@
   };
 </script>
 
-<main class="h-screen overflow-y-hidden">
+<main class="h-screen overflow-y-hidden text-neutral-900 dark:text-neutral-200" >
   <Modal components={modalRegistry} />
   <Router {routes} />
 </main>
